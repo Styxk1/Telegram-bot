@@ -1,9 +1,9 @@
 FROM python
 
-WORKDIR E:\TGBot
+WORKDIR /app/TGBot
 
 COPY . .
 
-RUN pip install aiogram
+RUN pip install -r requirements.txt
 
 CMD ["python","main.py"]
