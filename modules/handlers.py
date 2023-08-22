@@ -22,6 +22,7 @@ from database.database import (
     view_schedule,
     check_schedule,
     clear_schedule,
+    add_choise,
 )
 
 
@@ -91,19 +92,16 @@ async def command_choise_handler(message: Message):
     await Choise_state.text.set()
 
 
-arr = []
-
-
 @dp.message_handler(state=Choise_state.text)
 async def get_text1(message: Message, state: FSMContext):
     if message.text != "0":
-        arr.append(message.text)
+        add_choise(message.from_user.id, message.text)
         await Choise_state.text.set()
     else:
         await state.finish()
-        st = choise(arr)
+        st = choise(message.from_user.id)
         await message.answer(f"Я думаю лучше всего будет:\n{st}")
-        arr.clear()
+        print(st)
 
 
 @dp.message_handler(Command("help"))
@@ -224,7 +222,7 @@ async def command_schedule_view_handler(message: Message):
             "Приветственное сообщение",
             "Список команд",
             "Подбросить монетку",
-            "Меню",
+            "Сделать выбор",
             "Познакомиться",
             "Добавить пункт в график",
             "Показать график",
@@ -237,7 +235,7 @@ async def get_menu_command(message: Message):
         "Приветственное сообщение": command_start_handler,
         "Список команд": command_list_handler,
         "Подбросить монетку": command_flip_handler,
-        "Меню": command_menu_handler,
+        "Сделать выбор": command_choise_handler,
         "Познакомиться": command_dating_handler,
         "Добавить пункт в график": command_schedule_add_handler,
         "Показать график": command_schedule_view_handler,

@@ -38,6 +38,21 @@ def check_db():
             )
             conn.commit()
 
+    try:
+        cur.execute("SELECT * FROM choise")
+
+    except sqlite3.OperationalError:
+        print("Database choise does not exsist")
+        if sqlite3.OperationalError:
+            cur.execute(
+                """CREATE TABLE choise(
+                        id INTEGER PRIMARY KEY,
+                        tg_id BIGINT,
+                        option text
+            )"""
+            )
+            conn.commit()
+
 
 def sql_start():
     check_db()
@@ -115,6 +130,28 @@ def view_schedule(id):
 def clear_schedule():
     cur.execute("DELETE FROM schedule")
     conn.commit()
+
+
+def add_choise(id, text):
+    cur.execute("INSERT INTO choise (tg_id, option) VALUES(?,?)", (id, text))
+    conn.commit()
+    print("Добавлена опция в выбор")
+
+
+def get_choise(id):
+    data = []
+    cur.execute("SELECT option FROM choise WHERE tg_id = (?)", (id,))
+    temp = cur.fetchall()
+    for i in temp:
+        data.append(i[0])
+    clear_choise(id)
+    return data
+
+
+def clear_choise(id):
+    cur.execute("DELETE FROM choise WHERE tg_id = (?)", (id,))
+    conn.commit()
+    print(f"Очищена таблица choise пользователя: {id}")
 
 
 def get_id(id):

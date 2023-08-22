@@ -1,5 +1,6 @@
 from random import randint
-from aiogram.types import Message
+
+from database.database import get_choise
 
 
 def flip():
@@ -10,6 +11,8 @@ def flip():
         return "Выпал орел!"
 
 
-def choise(arr):
-    rn = randint(0, len(arr))
+def choise(id):
+    arr = get_choise(id)
+    print(arr)
+    rn = randint(0, len(arr) - 1)
     return arr[rn]

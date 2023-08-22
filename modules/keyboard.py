@@ -11,7 +11,7 @@ menu = ReplyKeyboardMarkup(
             KeyboardButton(text="Подбросить монетку"),
         ],
         [
-            KeyboardButton(text="Меню"),
+            KeyboardButton(text="Сделать выбор"),
             KeyboardButton(text="Познакомиться"),
         ],
         [

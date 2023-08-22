@@ -19,7 +19,7 @@ def main():
     scheduler.add_job(check_time, "interval", minutes=1, args=(dp,))
     scheduler.start()
     settings = {"on_startup": send_to_adm_su, "on_shutdown": send_to_adm_sd}
-    executor.start_polling(dp, on_startup=send_to_adm_su, on_shutdown=send_to_adm_sd)
+    executor.start_polling(dp, **settings)
 
 
 if __name__ == "__main__":
