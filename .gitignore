@@ -161,3 +161,4 @@ cython_debug/
 
 # sample from developer
 *.db
+.vscode/
