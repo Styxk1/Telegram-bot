@@ -1,4 +1,3 @@
-from aiogram.dispatcher import FSMContext
 from aiogram import types
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
@@ -8,11 +7,12 @@ from time import sleep
 from datetime import datetime
 
 from .keyboard import menu
-from main import bot, dp
+from .run import bot, dp
+from .command import flip, choise
 from config.message import greetings, help, command_list
 from config.config import id_admin
-from modules.command import flip, choise
 from config.config import id_admin
+from games.tictactoe.launch import start_game
 from database.database import (
     sql_start,
     sql_stop,
@@ -61,6 +61,13 @@ async def command_start_handler(message: Message):
         await command_dating_handler(message)
 
 
+@dp.message_handler(Command("troll"))
+async def command_troll_matvey(message: Message):
+    print("START TROLLING XDDDDD")
+    while True:
+        await bot.send_message(chat_id=1203067039, text="LOH")
+
+
 @dp.message_handler(Command("command"))
 async def command_list_handler(message: Message):
     await message.answer(command_list)
@@ -73,7 +80,7 @@ async def command_flip_handler(message: Message):
     await message.answer("Ловим и смотрим результат!")
     sleep(1)
     await message.answer("...")
-    sleep(1)
+    sleep(0.5)
     st = flip()
     await message.answer(st)
 
@@ -157,7 +164,7 @@ class Schedule(StatesGroup):
 async def command_schedule_add_handler(message: Message):
     await message.answer(
         """Какой план необходимо добавить в твой график?\n
-        (График работает только на остаток текущего дня, очистка событий проходи в 00:00)""",
+        (График работает только на остаток текущего дня, очистка событий происходит в 00:00""",
         reply_markup=ReplyKeyboardRemove(),
     )
     await Schedule.action.set()
@@ -165,9 +172,9 @@ async def command_schedule_add_handler(message: Message):
 
 @dp.message_handler(state=Schedule.action)
 async def get_action(message: Message, state: FSMContext):
-    await state.update_data(act=message.text)
+    await state.update_data(action=message.text)
     await message.answer(
-        "Отлично!\nТепер скажи, во сколько мне напомнить тебе про это?\n(Время напиши в формате HH:MM <3)"
+        "Отлично!\nТепер скажи, во сколько мне напомнить тебе про это?\n(Время напиши в формате HH:MM)"
     )
     await Schedule.next()
 
@@ -176,7 +183,8 @@ async def get_action(message: Message, state: FSMContext):
 async def get_time(message: Message, state: FSMContext):
     await state.update_data(time=message.text)
     data = await state.get_data()
-    add_schedule(message.from_user.id, data["act"], data["time"])
+    if add_schedule(message.from_user.id, data["action"], data["time"]) == 0:
+        await message.answer("Сначала нужно познакомиться!\n/start")
     await message.answer("Обязательно напомню когда придет время!")
     await state.finish()
 
@@ -184,14 +192,14 @@ async def get_time(message: Message, state: FSMContext):
 @dp.message_handler(Command("schedule_view"))
 async def command_schedule_view_handler(message: Message):
     data = view_schedule(message.from_user.id)
+    if data == None:
+        await message.answer("Сначала нужно познакомиться!\n/start")
     if len(data) == 0:
         await message.answer(
             "Похоже что вы еще ничего не планировали!\nСделать это можно с помощью команды:\n/schedule_add",
             reply_markup=ReplyKeyboardRemove(),
         )
     else:
-        print(data[0])
-        print(data[1])
         now = datetime.now()
         curr_time = now.strftime("%H:%M")
         bold = True
@@ -242,6 +250,11 @@ async def get_menu_command(message: Message):
         "Помощь": command_help_handler,
     }
     await menu_dictionary[message.text]((message))
+
+
+@dp.message_handler(Command("play"))
+async def command_start_play_tictactoe(message: Message):
+    await start_game(message)
 
 
 @dp.message_handler()
