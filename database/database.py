@@ -83,6 +83,8 @@ def add_user(
 
 def add_schedule(id, action, time):
     user_id = get_id(id)
+    if user_id == 0:
+        return 0
     cur.execute(
         "INSERT INTO schedule (reminder_time, action, user_id) VALUES(?, ?, ?)",
         (time, action, user_id),
@@ -108,23 +110,30 @@ def check_schedule(time):
 
 
 def view_schedule(id):
-    user_id = get_id(id)
-    data = [[], []]
-    cur.execute(
-        "SELECT reminder_time FROM schedule WHERE user_id = (?) ORDER BY reminder_time",
-        (user_id,),
-    )
-    temp = cur.fetchall()
-    for i in temp:
-        data[0].append(i[0])
-    cur.execute(
-        "SELECT action FROM schedule WHERE user_id = (?) ORDER BY reminder_time",
-        (user_id,),
-    )
-    temp = cur.fetchall()
-    for i in temp:
-        data[1].append(i[0])
-    return data
+    cur.execute("SELECT COUNT(*) FROM schedule")
+    temp = cur.fetchall()[0]
+    if temp[0] == 0:
+        return []
+    else:
+        user_id = get_id(id)
+        if user_id == None:
+            return None
+        data = [[], []]
+        cur.execute(
+            "SELECT reminder_time FROM schedule WHERE user_id = (?) ORDER BY reminder_time",
+            (user_id,),
+        )
+        temp = cur.fetchall()
+        for i in temp:
+            data[0].append(i[0])
+        cur.execute(
+            "SELECT action FROM schedule WHERE user_id = (?) ORDER BY reminder_time",
+            (user_id,),
+        )
+        temp = cur.fetchall()
+        for i in temp:
+            data[1].append(i[0])
+        return data
 
 
 def clear_schedule():
@@ -156,8 +165,24 @@ def clear_choise(id):
 
 def get_id(id):
     print(id)
-    cur.execute("SELECT id FROM users WHERE tg_id = (?)", (id,))
-    return cur.fetchone()[0]
+    cur.execute("SELECT EXISTS(SELECT * FROM users WHERE tg_id = (?))", (id,))
+    temp = cur.fetchone()[0]
+    print(temp)
+    if temp == 0:
+        return None
+    else:
+        return temp
+
+
+def get_name_from_db(id):
+    print(id)
+    data = [[], []]
+    cur.execute("SELECT tg_id, name FROM users WHERE tg_id != (?)", (id,))
+    temp = cur.fetchall()
+    for i in temp:
+        data[0].append(i[0])
+        data[1].append(i[1])
+    return data
 
 
 def sql_stop():
